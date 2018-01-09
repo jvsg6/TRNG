@@ -12,51 +12,40 @@ void show_vector( vector<int>&a)
         cout<<*it<<"   ";
 }
 int main() {
+
     std::vector<int> vecx;
     std::vector<int> vecy;
-    omp_set_num_threads(1);
+   // omp_set_num_threads(2);
     const long samples=1000000l;
-    long in=0l;
-    std::cout<<"size:  "<<omp_get_num_threads()<<"  "<<"rank:  "<<omp_get_thread_num()<<std::endl;
-    // total number of points in square
-    // number of points in c i r c l e
-    // distribute workload over a l l processes and make a global reduction
-#pragma omp parallel /*num_threads(2)*/ reduction(+:in)
+    long in = 0l;
+#pragma omp parallel num_threads(3) reduction(+:in)
     {
         ofstream fout;
         int i, n ;
         string name;
         i= omp_get_thread_num();
-        std::string ii = std::to_string(i);
+        std::string ii = std::to_string(i+1);
         n=omp_get_num_threads();
         std::string nn = std::to_string(n);
-        name="thread_"+ii+"from_"+nn+".txt";
-        fout.open(name);
+        name="/home/egor/quest/trng/bin/thread_"+ii+"_from_"+nn+".txt";
+        cout<< name<<endl;
+        fout.open("name.txt");
         fout << "Работа с файлами в С++";
         fout.close();
         trng::yarn2 r;
         int size=omp_get_num_threads();
         int rank=omp_get_thread_num();
-        std::cout<<"size:  "<<omp_get_num_threads()<<"  "<<"rank:  "<<omp_get_thread_num()<<std::endl;
+        //std::cout<<"size:  "<<omp_get_num_threads()<<"  "<<"rank:  "<<omp_get_thread_num()<<std::endl;
         trng::uniform01_dist<> u;
         r.jump(2*(rank*samples/size));
         for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {
             double x=u(r), y=u(r);
             // choose random x − and y − coordinates
-            vecx.push_back (x);
-            vecy.push_back (y);
             if (x*x+y*y<=1.0){
-                // i s point in c i r c l e ?
                 ++in;
-                //std::cout<<"in:  "<<in<<std::endl;
             }
-            // increase thread − local counter
         }
     }
-    // print result
-
-    //for (vector<int>::iterator it = vecx.begin() ; it!=vecx.end() ; ++it)
-        //cout<<*it<<"   "<<endl;
     std::cout << " pi = " << 4.0*in/samples << std::endl;
     return EXIT_SUCCESS;
 }
